@@ -1,7 +1,7 @@
-### Homework 1: Phase 1
+### Variable Understanding
 
 # set the working directory
-setwd("C:/Users/alexr/Documents/Documents/NCSU/MSA Program/Fall 2021/AA502/Logistic Regression/Homework1_LR")
+setwd("C:/Users/alexr/OneDrive/Documents/NCSU/MSA Program/Fall 2021/AA502/Logistic Regression/Homework1_LR")
 
 # import libraries
 library(ggplot2)
@@ -21,7 +21,7 @@ ins_v = read.csv("insurance_v.csv")
 
 ###################################################################################################
 
-## Problem 1
+## Part1
 
 # classify the variables...
 
@@ -173,7 +173,7 @@ write.csv(tbl_sig, "C:/Users/alexr/OneDrive/Documents/NCSU/MSA Program/Fall 2021
 
 ###################################################################################################
 
-## Problem 2
+## Part 2
 
 # create an empty data frame to fill
 df5 <- data.frame(variable = character(), odds_ratio = double())
@@ -198,11 +198,15 @@ write.csv(tbl_odds, "C:/Users/alexr/OneDrive/Documents/NCSU/MSA Program/Fall 202
 # purchase an insurance product then customers without an investment
 # account
 
+# observing the table of odds ratios, it appears that customers who 
+# actively participate in some form of saving or investment have 
+# higher odds of purchasing an annuity than customers who do not.
+
 
 
 ###################################################################################################
 
-# Problem 3
+# Part 3
 
 # provide a summary of results around the linearity assumption of continuous variables
 
@@ -280,7 +284,7 @@ write.csv(tbl_nonlin, "C:/Users/alexr/OneDrive/Documents/NCSU/MSA Program/Fall 2
 
 ###################################################################################################
 
-# Problem 4
+# Part 4
 
 # create a visualization of the variables that have the highest percentage of missing values
 
@@ -309,6 +313,9 @@ tbl_na %>%
 
 # redundant variables: (DDA, DDABAL), (SAV, SAVBAL), (ATM, ATMAMT), (CD, CDBAL),
 #                      (IRA, IRABAL), (LOC, LOCBAL), (INV, INVBAL), (ILS, ILSBAL),
+
+
+
 #                      (MM, MMBAL), (MTG, MTGBAL), (CC, CCBAL), (CCBAL, CCPURC),
 #                      (INCOME, AGE), (HMOWN, HMVAL), (LORES, AGE), (INCOME, HMVAL),
 #                      (HMOWN, AGE), (HMVAL, AGE), (MTG, HMOWN), (LOC, CC)?
@@ -322,13 +329,43 @@ pairs(conts_df[21:25])
 
 # 1) there appears to be a strong linear relationship between MTGBAL and CCBAl
 # numerically investigate the relationship between MTGBAL and CCBAL
+cor(ins_t$MTGBAL, ins_t$CCBAL, method = "pearson", use = "complete.obs")
 
 # 2) number of teller visit interactions drops sharply as total ATM withdrawal amount increases
-
 # 3) number of checks written appears to drop as number of telephone banking interactions increases
-
 # 4) exactly the same number of missing values for eight variables
-
 # 5) age variable has the highest number of missing values (perhaps customers uncomfortable reporting this?)
 
+
 # TODO: closely examine the response variable (INS), use summary function, plot against other predictor, etc...
+
+# use Boolean indexing to determine the number of customers that purchased an insurance product
+ins_purch <- ins_t$INS[ins_t$INS == 1]
+num_ins_purch <- length(ins_purch)
+
+# use Boolean indexing to determine the number of customers that did not purchase an insurance product
+no_purch <- ins_t$INS[ins_t$INS != 1]
+num_no_purch <- length(no_purch)
+
+# do the same thing as above, all while staying in the tidyverse
+purchases <- ins_t %>%
+  count(INS, sort = T)
+
+# use box plots to visualize the relationship between INS and continuous predictors
+ggplot(ins_t) +
+  geom_boxplot(aes(x = as.factor(INS), y = CRSCORE))
+
+ggplot(ins_t) +
+  geom_boxplot(aes(x = as.factor(INS), y = INCOME))
+
+ggplot(ins_t) +
+  geom_boxplot(aes(x = as.factor(INS), y = CCBAL))
+
+
+# subset data frame to remove observations where INV is missing
+ins_t2 <- ins_t %>%
+  filter(!is.na(INV))
+
+# use cross-tabulation tables to visualize the relationship between INS and categorical predictors
+ggplot(data = ins_t2) +
+  geom_bar(mapping = aes(x = as.factor(INV), fill = as.factor(INS)))
